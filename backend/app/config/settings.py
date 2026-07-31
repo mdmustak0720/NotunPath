@@ -11,6 +11,13 @@ class Settings(BaseSettings):
 
     MONGODB_URI: str
 
+    # Google OAuth Client ID
+    GOOGLE_CLIENT_ID:str
+
+    # JWT Configuration
+    JWT_SECRET_KEY: str
+    JWT_ALGORITHM: str
+    
     class Config:
         env_file = ".env"
 

@@ -17,4 +17,4 @@ app.include_router(
 @app.get("/")
 
 def home():
-    return {"message": "Welcome to NotunPath 🚀"} 
+    return {"message": "Welcome to NotunPath 🚀"}
