@@ -1,0 +1,16 @@
+/* Purpose: Defines global styles for the application. */
+
+@import "tailwindcss";
+
+html,
+body,
+#root {
+  width: 100%;
+  min-height: 100%;
+}
+
+body {
+  background: #050816;
+  color: white;
+  font-family: Inter, sans-serif;
+}
