@@ -3,10 +3,12 @@
 import { GoogleLogin } from "@react-oauth/google";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import useAuthStore from "../store/authStore";
 
 function Login() {
   // React Router navigation
   const navigate = useNavigate();
+  const {login} = useAuthStore();
 
   // Handle successful Google login
   const handleSuccess = async (credentialResponse) => {
@@ -22,20 +24,14 @@ function Login() {
       // Print backend response
       console.log("Backend Response:", response.data);
 
-      // Save JWT token
-      localStorage.setItem(
-        "token",
+      // Save user and token in Zustand
+      login(
+        response.data.user,
         response.data.access_token
       );
-
-      // Save user information
-      localStorage.setItem(
-        "user",
-        JSON.stringify(response.data.user)
-      );
-
+    
       // Redirect to Welcome page
-      navigate("/welcome");
+      navigate("/dashboard");
 
     } catch (error) {
       console.error(error.response?.data || error.message);
