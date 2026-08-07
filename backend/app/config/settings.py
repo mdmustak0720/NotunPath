@@ -17,6 +17,10 @@ class Settings(BaseSettings):
     # JWT Configuration
     JWT_SECRET_KEY: str
     JWT_ALGORITHM: str
+
+    AI_PROVIDER:str
+    GEMINI_API_KEY:str
+    GEMINI_MODEL:str
     
     class Config:
         env_file = ".env"

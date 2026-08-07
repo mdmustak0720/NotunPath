@@ -1,98 +1,63 @@
-// Purpose: Main dashboard page.
+// Purpose: Main dashboard workspace displayed after user authentication.
 
 import Sidebar from "../components/layout/Sidebar";
 import Navbar from "../components/layout/Navbar";
+import ResumeUpload from "../components/resume/ResumeUpload";
 import useAuthStore from "../store/authStore";
 
 function Dashboard() {
 
-  // Logged-in user
+  // Get the authenticated user.
   const { user } = useAuthStore();
 
   return (
-
     <div className="flex min-h-screen bg-[#030712]">
 
       {/* Sidebar */}
       <Sidebar />
 
-      {/* Right Section */}
       <div className="flex flex-1 flex-col">
 
-        {/* Top Navbar */}
+        {/* Top navigation */}
         <Navbar />
 
-        {/* Main Content */}
-        <main className="flex flex-1 items-center justify-center p-10">
+        {/* Dashboard content */}
+        <main className="flex-1 p-10">
 
-          {/* Welcome Card */}
-          <div className="w-full max-w-xl rounded-3xl border border-white/10 bg-white/5 p-10 backdrop-blur-xl">
+          {/* Welcome section */}
+          <section className="mb-10">
 
-            {/* Profile */}
-            <div className="flex flex-col items-center">
+            <h1 className="text-4xl font-bold text-white">
+              👋 Welcome back, {user?.name}
+            </h1>
 
-              <img
-                src={user?.picture}
-                alt={user?.name}
-                className="mb-6 h-28 w-28 rounded-full border-4 border-cyan-400"
-              />
+            <p className="mt-3 text-lg text-gray-400">
+              Your AI Career Coach is ready. Upload your resume to begin your personalized career journey.
+            </p>
 
-              <h1 className="text-4xl font-bold text-white">
-                Welcome,
-              </h1>
+          </section>
 
-              <h2 className="mt-2 text-2xl font-semibold text-cyan-400">
-                {user?.name}
-              </h2>
+          {/* Resume upload */}
+          <section className="rounded-3xl border border-white/10 bg-white/5 p-8 backdrop-blur-xl">
 
-              <p className="mt-4 text-gray-400">
-                {user?.email}
-              </p>
+            <h2 className="mb-2 text-2xl font-semibold text-white">
+              📄 Upload Your Resume
+            </h2>
 
-            </div>
+            <p className="mb-8 text-gray-400">
+              Upload your latest resume to unlock AI-powered career analysis.
+            </p>
 
-            {/* Divider */}
-            <div className="my-8 border-t border-white/10"></div>
+            <ResumeUpload />
 
-            {/* Status */}
-            <div className="space-y-4">
-
-              <div className="flex justify-between">
-
-                <span className="text-gray-400">
-                  Authentication
-                </span>
-
-                <span className="font-medium text-green-400">
-                  Active ✅
-                </span>
-
-              </div>
-
-              <div className="flex justify-between">
-
-                <span className="text-gray-400">
-                  Account
-                </span>
-
-                <span className="font-medium text-cyan-400">
-                  Google
-                </span>
-
-              </div>
-
-            </div>
-
-          </div>
+          </section>
 
         </main>
 
       </div>
 
     </div>
-
   );
-
 }
 
 export default Dashboard;
