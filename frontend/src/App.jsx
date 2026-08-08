@@ -4,6 +4,7 @@ import { Routes, Route } from "react-router-dom";
 
 import Login from "./pages/Login";
 import Welcome from "./pages/Welcome";
+import Profile from "./pages/Profile";
 
 // Custom hook to restore authentication
 import useAuthLoader from "./hooks/useAuthLoader";
@@ -26,12 +27,22 @@ function App() {
         element={<Login />}
       />
 
-      {/* Protected Route */}
+      {/* Protected Dashboard */}
       <Route
         path="/dashboard"
         element={
           <ProtectedRoute>
             <Dashboard />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Protected Profile */}
+      <Route
+        path="/profile"
+        element={
+          <ProtectedRoute>
+            <Profile />
           </ProtectedRoute>
         }
       />

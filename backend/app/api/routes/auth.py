@@ -2,55 +2,84 @@
 Authentication Routes
 
 Purpose:
---------
-Handles authentication APIs.
+Handles authentication API endpoints.
 """
 
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException, status
 
-# Request schema
+from app.core.security import (
+    create_access_token,
+    verify_google_token,
+)
 from app.schemas.auth import GoogleAuthRequest
-
-# Security function
-from app.core.security import verify_google_token
-
-# User service
 from app.services.user_service import UserService
-from app.core.security import verify_google_token, create_access_token
+
 
 router = APIRouter(
-    prefix="/auth"
+    prefix="/auth",
 )
 
 
 @router.post("/google")
 async def google_login(data: GoogleAuthRequest):
+    """
+    Authenticate a user using Google OAuth.
 
-    # Verify Google token
-    google_user = verify_google_token(data.token)
+    Verifies the Google token, creates or retrieves
+    the user, updates login activity, and returns
+    an application JWT.
+    """
 
-    # Find existing user
-    existing_user = UserService.find_by_email(google_user["email"])
+    # Verify Google token.
+    try:
+        google_user = verify_google_token(data.token)
 
-    # Create user if not found
+    except HTTPException:
+        raise
+
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Google authentication failed.",
+        )
+
+    # Get the verified Google account email.
+    email = google_user.get("email")
+
+    if not email:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Google account email was not provided.",
+        )
+
+    # Find existing user.
+    existing_user = UserService.find_by_email(email)
+
+    # Create a new user or update login activity.
     if not existing_user:
-        existing_user = UserService.create_user(google_user)
+        existing_user = UserService.create_user(
+            google_user
+        )
+    else:
+        existing_user = UserService.update_last_login(
+            email
+        )
 
-    # Generate JWT
+    # Generate application JWT.
     access_token = create_access_token(
         {
             "sub": existing_user["email"]
         }
     )
 
-    # Return login response
+    # Return authentication response.
     return {
-        "message": "Login Successful",
+        "message": "Login successful.",
         "access_token": access_token,
         "token_type": "Bearer",
         "user": {
-            "name": existing_user["name"],
-            "email": existing_user["email"],
-            "picture": existing_user["picture"]
-        }
+            "name": existing_user.get("name"),
+            "email": existing_user.get("email"),
+            "picture": existing_user.get("picture"),
+        },
     }

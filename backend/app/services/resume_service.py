@@ -1,47 +1,121 @@
-# Purpose: Saves uploaded resumes and extracts text from PDF files.
+"""
+Resume Service
+
+Purpose:
+Handles resume file storage and PDF text extraction.
+"""
 
 import os
 import shutil
+from pathlib import Path
+from uuid import uuid4
+
 import fitz
 from fastapi import UploadFile
 
-UPLOAD_FOLDER = "app/uploads"
+
+# ---------------------------------------------------------
+# Configuration
+# ---------------------------------------------------------
+
+UPLOAD_FOLDER = Path("app/uploads")
 
 
-# Save the uploaded resume to the uploads folder.
-async def save_resume(file: UploadFile):
+# ---------------------------------------------------------
+# Save Resume
+# ---------------------------------------------------------
 
-    # Create uploads folder if it doesn't exist.
-    os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+async def save_resume(file: UploadFile) -> str:
+    """
+    Save an uploaded resume PDF to the uploads directory.
 
-    # Build the destination path.
-    file_path = os.path.join(
-        UPLOAD_FOLDER,
-        file.filename
+    A unique filename is generated to prevent two users
+    from accidentally overwriting each other's resumes.
+
+    Returns:
+        str: Path to the saved resume.
+    """
+
+    # Create upload directory if it does not exist.
+    UPLOAD_FOLDER.mkdir(
+        parents=True,
+        exist_ok=True,
     )
 
-    # Save the uploaded PDF.
-    with open(file_path, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
+    # Get the original filename safely.
+    original_filename = Path(
+        file.filename or "resume.pdf"
+    ).name
 
-    # Return the saved file path.
-    return file_path
+    # Preserve the original extension.
+    extension = Path(
+        original_filename
+    ).suffix.lower()
+
+    if extension != ".pdf":
+        extension = ".pdf"
+
+    # Generate a unique filename.
+    unique_filename = (
+        f"{uuid4().hex}{extension}"
+    )
+
+    # Build the final file path.
+    file_path = UPLOAD_FOLDER / unique_filename
+
+    try:
+        # Save the uploaded file.
+        with file_path.open("wb") as buffer:
+            shutil.copyfileobj(
+                file.file,
+                buffer,
+            )
+
+    except Exception:
+        # Remove partially written file if saving fails.
+        if file_path.exists():
+            file_path.unlink()
+
+        raise
+
+    return str(file_path)
 
 
-# Extract text from the uploaded PDF.
-def extract_resume_text(file_path):
+# ---------------------------------------------------------
+# Extract Resume Text
+# ---------------------------------------------------------
 
-    # Open the PDF document.
-    document = fitz.open(file_path)
+def extract_resume_text(file_path: str) -> str:
+    """
+    Extract text from every page of a PDF resume.
 
-    text = ""
+    Returns:
+        str: Extracted and stripped text.
+    """
 
-    # Read text from every page.
-    for page in document:
-        text += page.get_text()
+    document = None
 
-    # Close the PDF.
-    document.close()
+    try:
+        # Open the PDF.
+        document = fitz.open(file_path)
 
-    # Return the extracted text.
-    return text.strip()
+        text_parts = []
+
+        # Extract text from every page.
+        for page in document:
+            page_text = page.get_text()
+
+            if page_text:
+                text_parts.append(page_text)
+
+        # Combine extracted text.
+        extracted_text = "\n".join(
+            text_parts
+        ).strip()
+
+        return extracted_text
+
+    finally:
+        # Always close the PDF document.
+        if document is not None:
+            document.close()
