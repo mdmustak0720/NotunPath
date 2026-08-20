@@ -7,8 +7,7 @@ AI-powered resume analysis and career profile platform.
 - Google OAuth + JWT authentication
 - PDF resume upload
 - Resume text extraction and cleaning
-- Gemini-powered structured resume analysis
-- Pydantic-validated AI output
+- Gemini-powered structured analysis
 - MongoDB persistence
 - Resume history and latest-resume retrieval
 - AI-generated career profile dashboard
@@ -25,6 +24,53 @@ AI-powered resume analysis and career profile platform.
 **Database:** MongoDB Atlas
 
 **AI:** Gemini
+
+## Pipeline
+
+```text
+┌──────────────────┐
+│   Google Login   │
+└────────┬─────────┘
+         ↓
+┌──────────────────┐
+│ Authentication   │
+│  OAuth → JWT     │
+└────────┬─────────┘
+         ↓
+┌──────────────────┐
+│  Resume Upload   │
+│      PDF         │
+└────────┬─────────┘
+         ↓
+┌──────────────────┐
+│  Text Extraction │
+│    PyMuPDF       │
+└────────┬─────────┘
+         ↓
+┌──────────────────┐
+│ Text Cleaning &  │
+│  Normalization   │
+└────────┬─────────┘
+         ↓
+┌──────────────────┐
+│  Gemini Analysis │
+│  Structured JSON │
+└────────┬─────────┘
+         ↓
+┌──────────────────┐
+│ Schema Validation│
+│   & Normalization│
+└────────┬─────────┘
+         ↓
+┌──────────────────┐
+│     MongoDB      │
+└────────┬─────────┘
+         ↓
+┌──────────────────┐
+│ Career Profile   │
+│    Dashboard     │
+└──────────────────┘
+```
 
 ## Architecture
 
@@ -56,52 +102,6 @@ NotunPath/
         ├── schemas/
         └── services/
 ```
-
-## Flow
-
-```text
-Google Login
-    ↓
-JWT Authentication
-    ↓
-Dashboard
-    ↓
-PDF Upload
-    ↓
-Text Extraction
-    ↓
-Text Cleaning
-    ↓
-Gemini Analysis
-    ↓
-Pydantic Schema
-    ↓
-Normalization
-    ↓
-MongoDB
-    ↓
-Career Profile
-```
-
-## Resume Analysis
-
-- Personal information
-- Professional summary
-- Target roles
-- Skills
-- Work experience
-- Projects
-- Education
-- Certifications
-- Achievements
-- Publications
-- Research
-- Licenses
-- Languages
-- Volunteer experience
-- Internships
-- Awards
-- Custom sections
 
 ## API
 
