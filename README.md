@@ -4,12 +4,10 @@ AI-powered resume analysis and career profile platform.
 
 ## Features
 
-- Google OAuth authentication
-- JWT-based API authentication
+- Google OAuth + JWT authentication
 - PDF resume upload
-- Resume text extraction with PyMuPDF
-- Resume text cleaning and normalization
-- Structured AI resume analysis with Gemini
+- Resume text extraction and cleaning
+- Gemini-powered structured resume analysis
 - Pydantic-validated AI output
 - MongoDB persistence
 - Resume history and latest-resume retrieval
@@ -20,34 +18,13 @@ AI-powered resume analysis and career profile platform.
 
 ## Tech Stack
 
-### Frontend
+**Frontend:** React 19, Vite, React Router, Zustand, Axios, React Dropzone, Motion, Lucide React
 
-- React 19
-- Vite
-- React Router
-- Zustand
-- Axios
-- React Dropzone
-- Motion
-- Lucide React
-- Google OAuth
+**Backend:** Python, FastAPI, Pydantic, PyMuPDF, PyMongo, Python-JOSE, Google Auth, Google GenAI SDK
 
-### Backend
+**Database:** MongoDB Atlas
 
-- Python
-- FastAPI
-- Pydantic
-- PyMuPDF
-- PyMongo
-- Python-JOSE
-- Google Auth
-- Google GenAI SDK
-
-### Database & AI
-
-- MongoDB Atlas
-- Gemini
-- Structured JSON output
+**AI:** Gemini
 
 ## Architecture
 
@@ -56,35 +33,28 @@ NotunPath/
 ├── frontend/
 │   └── src/
 │       ├── components/
-│       │   ├── layout/
-│       │   └── resume/
 │       ├── hooks/
 │       ├── pages/
 │       ├── services/
 │       ├── store/
-│       ├── styles/
-│       ├── App.jsx
-│       └── main.jsx
+│       └── styles/
 │
 └── backend/
-    ├── app/
-    │   ├── ai/
-    │   │   ├── analyzers/
-    │   │   ├── prompts/
-    │   │   ├── providers/
-    │   │   ├── schemas/
-    │   │   └── utils/
-    │   ├── api/
-    │   │   └── routes/
-    │   ├── config/
-    │   ├── core/
-    │   ├── database/
-    │   ├── models/
-    │   ├── repositories/
-    │   ├── schemas/
-    │   ├── services/
-    │   └── main.py
-    └── requirements.txt
+    └── app/
+        ├── ai/
+        │   ├── analyzers/
+        │   ├── prompts/
+        │   ├── providers/
+        │   ├── schemas/
+        │   └── utils/
+        ├── api/routes/
+        ├── config/
+        ├── core/
+        ├── database/
+        ├── models/
+        ├── repositories/
+        ├── schemas/
+        └── services/
 ```
 
 ## Flow
@@ -92,34 +62,28 @@ NotunPath/
 ```text
 Google Login
     ↓
-Google ID Token
+JWT Authentication
     ↓
-FastAPI Authentication
+Dashboard
     ↓
-Application JWT
+PDF Upload
     ↓
-Protected Dashboard
-    ↓
-PDF Resume Upload
-    ↓
-PDF Text Extraction
+Text Extraction
     ↓
 Text Cleaning
     ↓
 Gemini Analysis
     ↓
-Structured Resume Schema
+Pydantic Schema
     ↓
 Normalization
     ↓
 MongoDB
     ↓
-Career Profile Dashboard
+Career Profile
 ```
 
 ## Resume Analysis
-
-The structured analysis supports:
 
 - Personal information
 - Professional summary
@@ -141,36 +105,15 @@ The structured analysis supports:
 
 ## API
 
-Base path:
-
-```text
-/api/v1
-```
-
-### Authentication
+Base path: `/api/v1`
 
 ```http
 POST /auth/google
-```
-
-### User
-
-```http
-GET /user/me
-```
-
-### Resume
-
-```http
+GET  /user/me
 POST /resume/upload
 GET  /resume
 GET  /resume/latest
-```
-
-### Health
-
-```http
-GET /health
+GET  /health
 ```
 
 ## Setup
@@ -188,38 +131,20 @@ Windows:
 venv\Scripts\activate
 ```
 
-Install dependencies:
-
 ```bash
 pip install -r requirements.txt
+uvicorn app.main:app --reload
 ```
 
 Create `backend/.env`:
 
 ```env
-APP_NAME=NotunPath
-APP_VERSION=1.0.0
-APP_DESCRIPTION=AI Resume Analysis Platform
-DEBUG=True
-HOST=127.0.0.1
-PORT=8000
-
 MONGODB_URI=your_mongodb_uri
-
 GOOGLE_CLIENT_ID=your_google_client_id
-
 JWT_SECRET_KEY=your_jwt_secret
 JWT_ALGORITHM=HS256
-
-AI_PROVIDER=gemini
 GEMINI_API_KEY=your_gemini_api_key
 GEMINI_MODEL=your_gemini_model
-```
-
-Run:
-
-```bash
-uvicorn app.main:app --reload
 ```
 
 ### Frontend
@@ -227,6 +152,7 @@ uvicorn app.main:app --reload
 ```bash
 cd frontend
 npm install
+npm run dev
 ```
 
 Create `frontend/.env`:
@@ -234,39 +160,6 @@ Create `frontend/.env`:
 ```env
 VITE_API_BASE_URL=http://127.0.0.1:8000/api/v1
 VITE_GOOGLE_CLIENT_ID=your_google_client_id
-```
-
-Run:
-
-```bash
-npm run dev
-```
-
-## Environment Variables
-
-| Variable | Used by |
-|---|---|
-| `MONGODB_URI` | MongoDB connection |
-| `GOOGLE_CLIENT_ID` | Backend Google token verification |
-| `JWT_SECRET_KEY` | JWT signing |
-| `JWT_ALGORITHM` | JWT algorithm |
-| `AI_PROVIDER` | AI provider selection |
-| `GEMINI_API_KEY` | Gemini API |
-| `GEMINI_MODEL` | Gemini model selection |
-| `VITE_API_BASE_URL` | Frontend API base URL |
-| `VITE_GOOGLE_CLIENT_ID` | Frontend Google OAuth |
-
-## Project Structure
-
-```text
-Frontend
-React → Router → Protected Routes → Zustand → API Services
-
-Backend
-FastAPI → Routes → Services → AI / Repositories → MongoDB
-
-AI
-Resume Text → Prompt → Gemini → Pydantic Schema → Normalizer
 ```
 
 ## License
