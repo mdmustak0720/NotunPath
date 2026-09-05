@@ -5,13 +5,44 @@ Purpose:
 Analyzes a resume using the configured AI provider,
 validates the structured response, and normalizes
 the extracted resume data.
+
+Pipeline:
+
+    Resume Text
+        ↓
+    Prompt Builder
+        ↓
+    Gemini Structured Output
+        ↓
+    ResumeAnalysis Validation
+        ↓
+    Normalization
+        ↓
+    Structured Resume Dictionary
 """
 
-from app.ai.prompts.resume_prompt import build_resume_prompt
-from app.ai.providers.gemini_provider import generate_content
-from app.ai.schemas.resume_schema import ResumeAnalysis
-from app.ai.utils.resume_normalizer import normalize_resume_analysis
+from __future__ import annotations
 
+from app.ai.prompts.resume_prompt import (
+    build_resume_prompt,
+)
+
+from app.ai.providers.gemini_provider import (
+    generate_content,
+)
+
+from app.ai.schemas.resume_schema import (
+    ResumeAnalysis,
+)
+
+from app.ai.utils.resume_normalizer import (
+    normalize_resume_analysis,
+)
+
+
+# =========================================================
+# Public API
+# =========================================================
 
 def analyze_resume(
     resume_text: str,
@@ -19,10 +50,41 @@ def analyze_resume(
     """
     Analyze resume text and return validated,
     normalized structured resume data.
+
+    Args:
+        resume_text:
+            Extracted plain text from the resume PDF.
+
+    Returns:
+        Normalized structured resume analysis.
+
+    Raises:
+        ValueError:
+            Invalid or empty resume text.
+            Invalid AI response structure.
     """
 
     # -----------------------------------------------------
-    # Step 1: Build AI prompt
+    # Step 1: Validate input
+    # -----------------------------------------------------
+
+    if not isinstance(
+        resume_text,
+        str,
+    ):
+        raise ValueError(
+            "Resume text must be a string."
+        )
+
+    resume_text = resume_text.strip()
+
+    if not resume_text:
+        raise ValueError(
+            "Resume text cannot be empty."
+        )
+
+    # -----------------------------------------------------
+    # Step 2: Build AI prompt
     # -----------------------------------------------------
 
     prompt = build_resume_prompt(
@@ -30,18 +92,36 @@ def analyze_resume(
     )
 
     # -----------------------------------------------------
-    # Step 2: Generate structured Gemini response
-    # -----------------------------------------------------
-
-    response = generate_content(
-        prompt
-    )
-
-    # -----------------------------------------------------
-    # Step 3: Validate the JSON response
+    # Step 3: Generate structured Gemini response
+    #
+    # The response schema is explicitly passed so the
+    # provider is reusable for other AI analyzers too.
     # -----------------------------------------------------
 
     try:
+
+        response = generate_content(
+            prompt,
+            response_schema=ResumeAnalysis,
+        )
+
+    except Exception as error:
+
+        raise RuntimeError(
+            "Resume analysis failed while "
+            "calling the configured AI provider."
+        ) from error
+
+    # -----------------------------------------------------
+    # Step 4: Validate structured AI response
+    #
+    # Even though Gemini is requested to follow the
+    # Pydantic schema, we validate again at our own
+    # application boundary.
+    # -----------------------------------------------------
+
+    try:
+
         validated_analysis = (
             ResumeAnalysis.model_validate_json(
                 response
@@ -49,20 +129,27 @@ def analyze_resume(
         )
 
     except Exception as error:
+
         raise ValueError(
-            f"Invalid resume analysis structure: {error}"
+            "Invalid resume analysis structure: "
+            f"{error}"
         ) from error
 
     # -----------------------------------------------------
-    # Step 4: Convert validated model to dictionary
+    # Step 5: Convert Pydantic model to dictionary
     # -----------------------------------------------------
 
-    analysis = validated_analysis.model_dump(
-        exclude_none=False
+    analysis = (
+        validated_analysis.model_dump(
+            exclude_none=False
+        )
     )
 
     # -----------------------------------------------------
-    # Step 5: Remove empty and placeholder values
+    # Step 6: Normalize extracted data
+    #
+    # Removes placeholder/empty values while preserving
+    # meaningful values.
     # -----------------------------------------------------
 
     normalized_analysis = (
@@ -72,7 +159,23 @@ def analyze_resume(
     )
 
     # -----------------------------------------------------
-    # Step 6: Return final analysis
+    # Step 7: Final validation
+    #
+    # Ensure normalization still produces the expected
+    # dictionary contract.
+    # -----------------------------------------------------
+
+    if not isinstance(
+        normalized_analysis,
+        dict,
+    ):
+        raise ValueError(
+            "Normalized resume analysis must "
+            "be a dictionary."
+        )
+
+    # -----------------------------------------------------
+    # Step 8: Return final structured analysis
     # -----------------------------------------------------
 
     return normalized_analysis
