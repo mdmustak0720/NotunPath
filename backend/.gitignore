@@ -17,3 +17,16 @@ __pycache__/
 # OS files
 .DS_Store
 Thumbs.db
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+backend/venv/
+
+# Environment
+.env
+
+# Resume uploads
+backend/app/uploads/*.pdf
